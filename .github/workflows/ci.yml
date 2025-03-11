@@ -48,7 +48,7 @@ jobs:
 
       - uses: cvmfs-contrib/github-action-cvmfs@v4
       - name: Test CernVM-FS
-          run: ls /cvmfs/sft.cern.ch/
+        run: ls /cvmfs/sft.cern.ch/
       
       - uses: actions/setup-python@v4
         with:
