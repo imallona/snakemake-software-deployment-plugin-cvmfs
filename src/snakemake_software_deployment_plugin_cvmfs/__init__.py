@@ -1,3 +1,4 @@
+import subprocess, os
 from dataclasses import dataclass, field
 from typing import Iterable, Optional
 from snakemake_interface_software_deployment_plugins.settings import (
@@ -15,6 +16,7 @@ from snakemake_interface_software_deployment_plugins import (
 # Snakemake and the user as WorkflowError.
 from snakemake_interface_common.exceptions import WorkflowError  # noqa: F401
 
+from subprocess import CompletedProcess
 
 # Optional:
 # Define settings for your storage plugin (e.g. host url, credentials).
@@ -28,29 +30,23 @@ from snakemake_interface_common.exceptions import WorkflowError  # noqa: F401
 # settings.
 @dataclass
 class SoftwareDeploymentSettings(SoftwareDeploymentSettingsBase):
-    myparam: Optional[int] = field(
-        default=None,
+    cvmfs_repositories: Optional[str] = field(
+        default="atlas.cern.ch,grid.cern.ch",
         metadata={
-            "help": "Some help text",
-            # Optionally request that setting is also available for specification
-            # via an environment variable. The variable will be named automatically as
-            # SNAKEMAKE_<storage-plugin-name>_<param-name>, all upper case.
-            # This mechanism should only be used for passwords, usernames, and other
-            # credentials.
-            # For other items, we rather recommend to let people use a profile
-            # for setting defaults
-            # (https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles).
-            "env_var": False,
-            # Optionally specify a function that parses the value given by the user.
-            # This is useful to create complex types from the user input.
-            "parse_func": ...,
-            # If a parse_func is specified, you also have to specify an unparse_func
-            # that converts the parsed value back to a string.
-            "unparse_func": ...,
-            # Optionally specify that setting is required when the executor is in use.
+            "help": "CVMFS_REPOSITORIES to mount.",
+            "env_var": True,
             "required": True,
-            # Optionally specify multiple args with "nargs": "+"
         },
+    )
+
+    cvmfs_client_profile: Optional[str] = field(
+        default="single",
+        metadata={"help": "CVMFS_CLIENT_PROFILE.", "env_var": True, "required": True},
+    )
+
+    cvmfs_http_proxy: Optional[str] = field(
+        default="direct",
+        metadata={"help": "CVMFS_HTTP_PROXY", "env_var": True, "required": True},
     )
 
 
@@ -71,23 +67,27 @@ class EnvSpec(EnvSpecBase):
     # the attribute EnvSpecSourceFile.path_or_uri (of type str) can be used to show
     # the original value passed to the EnvSpec.
 
+    def __init__(self, *names: str):
+        super().__init__()
+        self.names: Tuple[str] = names
+    
+
+    ## these are module names
     @classmethod
-    def identity_attributes(cls) -> Iterable[str]:
-        # Yield the attributes of this subclass that uniquely identify the
-        # environment spec. These are used for hashing and equality comparison.
-        # For example, the name of the env or the path to the environment definition
-        # file or the URI of the container, whatever this plugin uses.
-        ...
+    def identity_attributes(self) -> Iterable[str]:
+        yield "names"
 
     @classmethod
     def source_path_attributes(cls) -> Iterable[str]:
         # Return iterable of attributes of the subclass that represent paths that are
         # supposed to be interpreted as being relative to the defining rule.
         # For example, this would be attributes pointing to conda environment files.
-        # Return empty list if no such attributes exist.
-        ...
+        # Return empty iterable if no such attributes exist.
+        return ()
 
 
+
+    
 # Required:
 # Implementation of an environment object.
 # If your environment cannot be archived or deployed, remove the respective methods
@@ -99,38 +99,86 @@ class Env(EnvBase, DeployableEnvBase, ArchiveableEnvBase):
     # futher stuff.
 
     def __post_init__(self) -> None:
-        # This is optional and can be removed if not needed.
-        # Alternatively, you can e.g. prepare anything or set additional attributes.
         self.check()
+        
+    def inject_cvmfs_envvars(self) -> dict:
+        env = {}
+        env.update(os.environ)
+        env["CVMS_REPOSITORIES"] = self.settings.cvmfs_repositories
+        env["CVMS_CLIENT_PROFILE"] = self.settings.cvmfs_client_profile
+        env["CVMS_HTTP_PROXY"] = self.settings.cvmfs_http_proxy
+        #print(env)
+        return env
+
+    @EnvBase.once
+    def cvmfs_config_setup(self) -> None:
+        if (
+            self.run_cmd(
+                "cvmfs_config setup",
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env=self.inject_cvmfs_envvars(),
+            ).returncode
+            != 0
+        ):
+            raise WorkflowError("Failed to cvfs_config setup.")
+
+    def cvmfs_config_probe(self) -> CompletedProcess:
+        cp = self.run_cmd(
+            "cvmfs_config probe",
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=self.inject_cvmfs_envvars(),
+        )
+        return cp
 
     # The decorator ensures that the decorated method is only called once
     # in case multiple environments of the same kind are created.
     @EnvBase.once
     def check(self) -> None:
-        # Check e.g. whether the required software is available (e.g. a container
-        # runtime or a module command).
-        ...
+        if (
+            self.run_cmd(
+                "type module",
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env=self.inject_cvmfs_envvars(),
+            ).returncode
+            != 0
+        ):
+            raise WorkflowError("The `module` command is not available.")
+        if (
+            self.run_cmd(
+                "cvmfs_config",
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env=self.inject_cvmfs_envvars(),
+            ).returncode
+            != 0
+        ):
+            raise WorkflowError("The `cvmfs_config` command is not available.")
+        if self.cvmfs_config_probe().returncode != 0:
+            raise WorkflowError(f"Failed to mount the cvmfs repository {' '.join(self.settings.cvmfs_repositories)}.")
 
     def decorate_shellcmd(self, cmd: str) -> str:
         # Decorate given shell command such that it runs within the environment.
-        ...
+        return f"module purge; module load {' '.join(self.spec.names)}; {cmd}"
 
     def record_hash(self, hash_object) -> None:
-        # Update given hash such that it changes whenever the environment
-        # could potentially contain a different set of software (in terms of versions or
-        # packages). Use self.spec (containing the corresponding EnvSpec object)
-        # to determine the hash.
-        hash_object.update(...)
+        ## the environment reflects both the modulepath and the modulename(s)
+        hash_object.update(",".join([self.spec.names, self.spec.modulepath]).encode())
 
     def report_software(self) -> Iterable[SoftwareReport]:
-        # Report the software contained in the environment. This should be a list of
-        # snakemake_interface_software_deployment_plugins.SoftwareReport data class.
-        # Use SoftwareReport.is_secondary = True if the software is just some
-        # less important technical dependency. This allows Snakemake's report to
-        # hide those for clarity. In case of containers, it is also valid to
-        # return the container URI as a "software".
-        # Return an empty tuple () if no software can be reported.
-        ...
+        cp = self.run_cmd(
+            f"module whatis {self.spec.names}",
+            text=True,
+            stdout=subprocess.PIPE,
+            env=inject_cvmfs_envvars(),
+        )
+        if cp.returncode != 0:
+            raise WorkflowError(f"Error trying to module whatis {self.spec.names}.")
+            return ()
+        else:
+            return SoftwareReport(name=self.spec.names, version=cp.stdout)
 
     # The methods below are optional. Remove them if not needed and adjust the
     # base classes above.
@@ -144,7 +192,7 @@ class Env(EnvBase, DeployableEnvBase, ArchiveableEnvBase):
         # self.run_cmd(cmd: str) -> subprocess.CompletedProcess in order to ensure that
         # it runs within eventual parent environments (e.g. a container or an env
         # module).
-        ...
+        pass
 
     def is_deployment_path_portable(self) -> bool:
         # Remove method if not deployable!
@@ -153,13 +201,13 @@ class Env(EnvBase, DeployableEnvBase, ArchiveableEnvBase):
         # For example, with conda, environments are not portable in that sense (cannot
         # be moved around, because deployed packages contain hardcoded absolute
         # RPATHs).
-        ...
+        pass
 
     def remove(self) -> None:
         # Remove method if not deployable!
         # Remove the deployed environment from self.deployment_path and perform
         # any additional cleanup.
-        ...
+        pass
 
     async def archive(self) -> None:
         # Remove method if not archiveable!
@@ -169,4 +217,4 @@ class Env(EnvBase, DeployableEnvBase, ArchiveableEnvBase):
         # self.run_cmd(cmd: str) -> subprocess.CompletedProcess in order to ensure that
         # it runs within eventual parent environments (e.g. a container or an env
         # module).
-        ...
+        pass

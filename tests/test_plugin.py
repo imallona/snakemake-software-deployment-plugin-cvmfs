@@ -10,6 +10,14 @@ from snakemake_interface_software_deployment_plugins.settings import (
     SoftwareDeploymentSettingsBase,
 )
 
+# from src.snakemake_software_deployment_plugin_cvmfs import (
+#     Env,
+#     EnvSpec,
+#     SoftwareDeploymentSettings
+# )
+
+
+from src.snakemake_software_deployment_plugin_cvmfs import *
 
 # There can be multiple subclasses of SoftwareDeploymentProviderBase here.
 # This way, you can implement multiple test scenarios.
@@ -25,20 +33,22 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
         # If the software deployment provider does not support deployable environments,
         # this method should return an existing environment spec that can be used
         # for testing
-        ...
+        return EnvSpec("module whatis lmod")
 
     def get_env_cls(self) -> Type[EnvBase]:
         # Return the environment class that should be tested.
-        ...
+        return Env
 
     def get_software_deployment_provider_settings(
         self,
     ) -> Optional[SoftwareDeploymentSettingsBase]:
-        # If your plugin has settings, return a valid settings object here.
-        # Otherwise, return None.
-        ...
+        return SoftwareDeploymentSettings(
+            cvmfs_repositories="grid.cern.ch",
+            cvmfs_client_profile="single",
+            cvmfs_http_proxy="direct",
+        )
 
     def get_test_cmd(self) -> str:
         # Return a test command that should be executed within the environment
         # with exit code 0 (i.e. without error).
-        ...
+        return "cvmfs_config showconfig grid.cern.ch"
