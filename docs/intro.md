@@ -1,0 +1,1 @@
+This plugin provides [CernVM-FS](https://cernvm.cern.ch/fs/) (`cvmfs`) support for Snakemake. It requires a working installation of both `cvmfs` and a modules tool, i.e. [Lmod](https://lmod.readthedocs.io/en/latest/index.html) or [environment-modules](https://modules.readthedocs.io/en/latest/module.html).

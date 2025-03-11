@@ -2,6 +2,8 @@
 
 `snakemake-software-deployment-plugin-cvmfs` provides [CernVM-FS (cvmfs)](https://cernvm.cern.ch/) support to Snakemake following the [oftware deployment plugin interface](https://github.com/snakemake/snakemake-interface-software-deployment-plugins).
 
+This plugin is under development.
+
 ## Nomenclature
 
 Here a _module_ means an _envmodule_ as managed by Lmod or other (ahem) module tools. For instance, an easybuilt GCC module named GCC/13.3.0 is:
@@ -19,7 +21,7 @@ And _repositories_ are `cvmfs` repositories, such as `grid.cern.ch` providing so
 
 ## Design
 
-We assume our users have a `module` handler, such as [Lmod](https://lmod.readthedocs.io/), `cvmfs` installed, and run the plugin on a laptop or very few (<5) clients (< 5). Main reason is caching/proxies, but `cvmfs` behaviour can be tuned as described in [their documentation](https://cvmfs.readthedocs.io/en/stable/cpt-quickstart.html#setting-up-the-software) if your set up is larger.
+We assume our users have a `module` handler, such as [Lmod](https://lmod.readthedocs.io/), `cvmfs` installed, and run the plugin on a laptop or very few (<5) clients. Main reason is caching/proxies, but `cvmfs` behaviour can be tuned as described in [their documentation](https://cvmfs.readthedocs.io/en/stable/cpt-quickstart.html#setting-up-the-software) if your set up is larger.
 
 
 ### Configuration
@@ -29,7 +31,6 @@ We assume our users have a `module` handler, such as [Lmod](https://lmod.readthe
 The plugin contains ssome sanity commands, including:
 
 1. `module` tool check
-2. `module purge`
 
 As well as those related to activation:
 
@@ -40,25 +41,12 @@ Plus configuration specification (to be tuned to mount specific repositories, or
 2. `CVMFS_REPOSITORIES=atlas.cern.ch,atlas-condb.cern.ch,grid.cern.ch`
 3. `CVMFS_CLIENT_PROFILE=single`
 
-As well as checks:
-
-4. `cvmfs_config probe`
-
-Plus classical accessors asuming Lmod-friendly commands
-
-1. `module load`, `module unload` for activations
-2. `module whatis` for reporting
-
-Finally, we also provide software backend hashes:
-
-1. as inspired by [the envmodules plugin](https://github.com/snakemake/snakemake-software-deployment-plugin-envmodules/blob/95765f99a757954c0932f5fac0a502237c7ff8c4/src/snakemake_software_deployment_plugin_envmodules/__init__.py#L50C4-L50C19`)
-
 ## EESSI
 
-To define EESSI cmvfs deployments:
+To test the plugin with EESSI cvmfs:
 
 ```
-Lorem ipsum
+To-do
 ```
 
 ## Contact

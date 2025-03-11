@@ -13,7 +13,7 @@ from snakemake_interface_software_deployment_plugins.settings import (
 from src.snakemake_software_deployment_plugin_cvmfs import (
     Env,
     EnvSpec,
-    SoftwareDeploymentSettings
+    SoftwareDeploymentSettings,
 )
 
 
