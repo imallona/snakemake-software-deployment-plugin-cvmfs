@@ -2,15 +2,21 @@
 name = "snakemake-software-deployment-plugin-cvmfs"
 version = "0.1.0"
 description = "A snakemake plugin to use CernVM-FS (cvmfs) as software deployment (backend)"
-authors = [
-    {name = "Izaskun Mallona",email = "izaskun.mallona@gmail.com"}
-]
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-]
+requires-python = ">=3.11,<4.0"
+dependencies = [ "snakemake-interface-common (>=1.17.4,<2.0.0)", "snakemake-interface-software-deployment-plugins (>=0.6.1,<0.7.0)",]
+repository = "https://github.com/imallona/snakemake-software-deployment-plugin-cvmfs"
+documentation = "https://snakemake.github.io/snakemake-plugin-catalog/plugins/software-deployment/cvmfs.html"
 
+[[project.authors]]
+name = "Izaskun Mallona"
+email = "izaskun.mallona@gmail.com"
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = [ "poetry-core>=2.0.0,<3.0.0",]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.9.10"
+coverage = "^7.6.12"
+pytest = "^8.3.5"
