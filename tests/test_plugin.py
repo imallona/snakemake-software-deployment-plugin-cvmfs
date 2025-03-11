@@ -10,14 +10,11 @@ from snakemake_interface_software_deployment_plugins.settings import (
     SoftwareDeploymentSettingsBase,
 )
 
-# from src.snakemake_software_deployment_plugin_cvmfs import (
-#     Env,
-#     EnvSpec,
-#     SoftwareDeploymentSettings
-# )
-
-
-from src.snakemake_software_deployment_plugin_cvmfs import *
+from src.snakemake_software_deployment_plugin_cvmfs import (
+    Env,
+    EnvSpec,
+    SoftwareDeploymentSettings
+)
 
 
 # There can be multiple subclasses of SoftwareDeploymentProviderBase here.

@@ -1,13 +1,12 @@
-import subprocess, os
+import subprocess
+import os
 from dataclasses import dataclass, field
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Tuple
 from snakemake_interface_software_deployment_plugins.settings import (
     SoftwareDeploymentSettingsBase,
 )
 from snakemake_interface_software_deployment_plugins import (
     EnvBase,
-    DeployableEnvBase,
-    ArchiveableEnvBase,
     EnvSpecBase,
     SoftwareReport,
 )
@@ -168,17 +167,18 @@ class Env(EnvBase):
         hash_object.update(",".join([self.spec.names, self.spec.modulepath]).encode())
 
     def report_software(self) -> Iterable[SoftwareReport]:
-        cp = self.run_cmd(
-            f"module whatis {self.spec.names}",
-            text=True,
-            stdout=subprocess.PIPE,
-            env=self.inject_cvmfs_envvars(),
-        )
-        if cp.returncode != 0:
-            raise WorkflowError(f"Error trying to module whatis {self.spec.names}.")
-            return ()
-        else:
-            return SoftwareReport(name=self.spec.names, version=cp.stdout)
+        # cp = self.run_cmd(
+        #     f"module whatis {self.spec.names}",
+        #     text=True,
+        #     stdout=subprocess.PIPE,
+        #     env=self.inject_cvmfs_envvars(),
+        # )
+        # if cp.returncode != 0:
+        #     raise WorkflowError(f"Error trying to module whatis {self.spec.names}.")
+        #     return ()
+        # else:
+        #     return SoftwareReport(name=self.spec.names, version=cp.stdout)
+        return ()
 
     # # The methods below are optional. Remove them if not needed and adjust the
     # # base classes above.
