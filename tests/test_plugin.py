@@ -19,6 +19,7 @@ from snakemake_interface_software_deployment_plugins.settings import (
 
 from src.snakemake_software_deployment_plugin_cvmfs import *
 
+
 # There can be multiple subclasses of SoftwareDeploymentProviderBase here.
 # This way, you can implement multiple test scenarios.
 # For each subclass, the test suite tests the environment activation and execution

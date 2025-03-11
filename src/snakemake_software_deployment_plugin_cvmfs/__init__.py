@@ -18,6 +18,7 @@ from snakemake_interface_common.exceptions import WorkflowError  # noqa: F401
 
 from subprocess import CompletedProcess
 
+
 # Optional:
 # Define settings for your storage plugin (e.g. host url, credentials).
 # They will occur in the Snakemake CLI as --sdm-<plugin-name>-<param-name>
@@ -70,7 +71,6 @@ class EnvSpec(EnvSpecBase):
     def __init__(self, *names: str):
         super().__init__()
         self.names: Tuple[str] = names
-    
 
     ## these are module names
     @classmethod
@@ -86,28 +86,26 @@ class EnvSpec(EnvSpecBase):
         return ()
 
 
-
-    
 # Required:
 # Implementation of an environment object.
 # If your environment cannot be archived or deployed, remove the respective methods
 # and the respective base classes.
 # All errors should be wrapped with snakemake-interface-common.errors.WorkflowError
-class Env(EnvBase, DeployableEnvBase, ArchiveableEnvBase):
+class Env(EnvBase):
     # For compatibility with future changes, you should not overwrite the __init__
     # method. Instead, use __post_init__ to set additional attributes and initialize
     # futher stuff.
 
     def __post_init__(self) -> None:
         self.check()
-        
+
     def inject_cvmfs_envvars(self) -> dict:
         env = {}
         env.update(os.environ)
         env["CVMS_REPOSITORIES"] = self.settings.cvmfs_repositories
         env["CVMS_CLIENT_PROFILE"] = self.settings.cvmfs_client_profile
         env["CVMS_HTTP_PROXY"] = self.settings.cvmfs_http_proxy
-        #print(env)
+        # print(env)
         return env
 
     @EnvBase.once
@@ -157,7 +155,9 @@ class Env(EnvBase, DeployableEnvBase, ArchiveableEnvBase):
         ):
             raise WorkflowError("The `cvmfs_config` command is not available.")
         if self.cvmfs_config_probe().returncode != 0:
-            raise WorkflowError(f"Failed to mount the cvmfs repository {' '.join(self.settings.cvmfs_repositories)}.")
+            raise WorkflowError(
+                f"Failed to mount the cvmfs repository {' '.join(self.settings.cvmfs_repositories)}."
+            )
 
     def decorate_shellcmd(self, cmd: str) -> str:
         # Decorate given shell command such that it runs within the environment.
@@ -172,7 +172,7 @@ class Env(EnvBase, DeployableEnvBase, ArchiveableEnvBase):
             f"module whatis {self.spec.names}",
             text=True,
             stdout=subprocess.PIPE,
-            env=inject_cvmfs_envvars(),
+            env=self.inject_cvmfs_envvars(),
         )
         if cp.returncode != 0:
             raise WorkflowError(f"Error trying to module whatis {self.spec.names}.")
@@ -180,41 +180,41 @@ class Env(EnvBase, DeployableEnvBase, ArchiveableEnvBase):
         else:
             return SoftwareReport(name=self.spec.names, version=cp.stdout)
 
-    # The methods below are optional. Remove them if not needed and adjust the
-    # base classes above.
+    # # The methods below are optional. Remove them if not needed and adjust the
+    # # base classes above.
 
-    async def deploy(self) -> None:
-        # Remove method if not deployable!
-        # Deploy the environment to self.deployment_path, using self.spec
-        # (the EnvSpec object).
+    # async def deploy(self) -> None:
+    #     # Remove method if not deployable!
+    #     # Deploy the environment to self.deployment_path, using self.spec
+    #     # (the EnvSpec object).
 
-        # When issuing shell commands, the environment should use
-        # self.run_cmd(cmd: str) -> subprocess.CompletedProcess in order to ensure that
-        # it runs within eventual parent environments (e.g. a container or an env
-        # module).
-        pass
+    #     # When issuing shell commands, the environment should use
+    #     # self.run_cmd(cmd: str) -> subprocess.CompletedProcess in order to ensure that
+    #     # it runs within eventual parent environments (e.g. a container or an env
+    #     # module).
+    #     pass
 
-    def is_deployment_path_portable(self) -> bool:
-        # Remove method if not deployable!
-        # Return True if the deployment is portable, i.e. can be moved to a
-        # different location without breaking the environment. Return False otherwise.
-        # For example, with conda, environments are not portable in that sense (cannot
-        # be moved around, because deployed packages contain hardcoded absolute
-        # RPATHs).
-        pass
+    # def is_deployment_path_portable(self) -> bool:
+    #     # Remove method if not deployable!
+    #     # Return True if the deployment is portable, i.e. can be moved to a
+    #     # different location without breaking the environment. Return False otherwise.
+    #     # For example, with conda, environments are not portable in that sense (cannot
+    #     # be moved around, because deployed packages contain hardcoded absolute
+    #     # RPATHs).
+    #     pass
 
-    def remove(self) -> None:
-        # Remove method if not deployable!
-        # Remove the deployed environment from self.deployment_path and perform
-        # any additional cleanup.
-        pass
+    # def remove(self) -> None:
+    #     # Remove method if not deployable!
+    #     # Remove the deployed environment from self.deployment_path and perform
+    #     # any additional cleanup.
+    #     pass
 
-    async def archive(self) -> None:
-        # Remove method if not archiveable!
-        # Archive the environment to self.archive_path.
+    # async def archive(self) -> None:
+    #     # Remove method if not archiveable!
+    #     # Archive the environment to self.archive_path.
 
-        # When issuing shell commands, the environment should use
-        # self.run_cmd(cmd: str) -> subprocess.CompletedProcess in order to ensure that
-        # it runs within eventual parent environments (e.g. a container or an env
-        # module).
-        pass
+    #     # When issuing shell commands, the environment should use
+    #     # self.run_cmd(cmd: str) -> subprocess.CompletedProcess in order to ensure that
+    #     # it runs within eventual parent environments (e.g. a container or an env
+    #     # module).
+    #     pass
