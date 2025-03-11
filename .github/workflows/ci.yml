@@ -46,6 +46,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install environment-modules (not lmod)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y environment-modules
+
+      - name: Test environment-modules
+        run: |
+          source /etc/profile.d/modules.sh
+          type module
+          module --help
+        
       - uses: cvmfs-contrib/github-action-cvmfs@v4
       - name: Test CernVM-FS
         run: ls /cvmfs/sft.cern.ch/
@@ -69,7 +80,9 @@ jobs:
         run: poetry install
 
       - name: Run pytest
-        run: poetry run coverage run -m pytest
+        run: |
+          source /etc/profile.d/modules.sh
+          poetry run coverage run -m pytest
 
       - name: Run Coverage
         run: poetry run coverage report -m
