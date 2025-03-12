@@ -116,7 +116,7 @@ class Env(EnvBase):
             stderr=subprocess.PIPE,
             env=self.inject_cvmfs_envvars(),
         )
-        
+
         return cp
 
     def try_module_tool(self) -> CompletedProcess:
