@@ -41,9 +41,9 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
         self,
     ) -> Optional[SoftwareDeploymentSettingsBase]:
         return SoftwareDeploymentSettings(
-            cvmfs_repositories="grid.cern.ch",
-            cvmfs_client_profile="single",
-            cvmfs_http_proxy="direct",
+            repositories="atlas.cern.ch",
+            client_profile="single",
+            http_proxy="direct",
         )
 
     def get_test_cmd(self) -> str:
