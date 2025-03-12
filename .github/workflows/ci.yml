@@ -92,9 +92,7 @@ jobs:
 
       - name: Run pytest - with sftp.cern.ch
         run: |
-          export | grep CVMS        
           poetry run coverage run -m pytest
-          df -Th
 
       - name: Run Coverage
         run: poetry run coverage report -m

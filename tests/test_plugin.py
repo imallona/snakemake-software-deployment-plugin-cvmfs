@@ -41,7 +41,7 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
         self,
     ) -> Optional[SoftwareDeploymentSettingsBase]:
         return SoftwareDeploymentSettings(
-            repositories="sft.cern.ch",
+            repositories="pilot.eessi-hpc.org",
             client_profile="single",
             http_proxy="direct",
         )
@@ -49,4 +49,4 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
     def get_test_cmd(self) -> str:
         # Return a test command that should be executed within the environment
         # with exit code 0 (i.e. without error).
-        return "cvmfs_config showconfig grid.cern.ch"
+        return "cvmfs_config showconfig pilot.eessi-hpc.org"
