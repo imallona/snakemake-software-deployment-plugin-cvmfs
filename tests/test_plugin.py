@@ -41,7 +41,7 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
         self,
     ) -> Optional[SoftwareDeploymentSettingsBase]:
         return SoftwareDeploymentSettings(
-            repositories="atlas.cern.ch",
+            repositories="sft.cern.ch",
             client_profile="single",
             http_proxy="direct",
         )
