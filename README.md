@@ -2,7 +2,7 @@
 
 `snakemake-software-deployment-plugin-cvmfs` provides [CernVM-FS (cvmfs)](https://cernvm.cern.ch/) support to Snakemake following the [software deployment plugin interface](https://github.com/snakemake/snakemake-interface-software-deployment-plugins).
 
-**This plugin is under development**.
+_This plugin is under development and hasn't been fully tested_
 
 ## Installation and configuration
 
@@ -39,30 +39,12 @@ And _repositories_ are `cvmfs` repositories, such as `grid.cern.ch` providing so
 
 We assume our users have a `module` handler, such as [Lmod](https://lmod.readthedocs.io/), `cvmfs` installed, and run the plugin on a laptop or very few (<5) clients. Main reason is caching/proxies, but `cvmfs` behaviour can be tuned as described in [their documentation](https://cvmfs.readthedocs.io/en/stable/cpt-quickstart.html#setting-up-the-software) if your set up is larger.
 
-### Configuration
-
-### Plugin internal design details
-
-The plugin contains ssome sanity commands, including:
-
-1. `module` tool check
-
-As well as those related to activation:
-
-1. `cvmfs_config setup`
-
-Plus configuration specification (to be tuned to mount specific repositories, or large deployments)
-
-2. `CVMFS_REPOSITORIES=atlas.cern.ch,atlas-condb.cern.ch,grid.cern.ch`
-3. `CVMFS_CLIENT_PROFILE=single`
 
 ## EESSI
 
-To test the plugin with EESSI cvmfs:
+To use the [EESSI](https://www.eessi.io/) software specify `software.eessi.io` as (one of the) `cvmfs` repositories; that is, add `--sdm-snakemake-software-deployment-plugin-cvmfs-repositories software.eessi.io` to the snakemake call.
 
-```
-To-do
-```
+We [routinely mount EESSI](https://github.com/imallona/snakemake-software-deployment-plugin-cvmfs/blob/a508fe5330580e287265d8608d65ce9b34a85ad3/tests/test_plugin.py#L40) during our software checks.
 
 ## Contact
 
