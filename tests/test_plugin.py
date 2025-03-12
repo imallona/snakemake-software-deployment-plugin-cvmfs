@@ -31,7 +31,7 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
         # If the software deployment provider does not support deployable environments,
         # this method should return an existing environment spec that can be used
         # for testing
-        return EnvSpec("module whatis lmod")
+        return EnvSpec("module avail lmod")
 
     def get_env_cls(self) -> Type[EnvBase]:
         # Return the environment class that should be tested.
@@ -41,12 +41,12 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
         self,
     ) -> Optional[SoftwareDeploymentSettingsBase]:
         return SoftwareDeploymentSettings(
-            cvmfs_repositories="grid.cern.ch",
-            cvmfs_client_profile="single",
-            cvmfs_http_proxy="direct",
+            repositories="software.eessi.io,alice.cern.ch",
+            client_profile="single",
+            http_proxy="auto",
         )
 
     def get_test_cmd(self) -> str:
         # Return a test command that should be executed within the environment
         # with exit code 0 (i.e. without error).
-        return "cvmfs_config showconfig grid.cern.ch"
+        return "cvmfs_config showconfig software.eessi.io"

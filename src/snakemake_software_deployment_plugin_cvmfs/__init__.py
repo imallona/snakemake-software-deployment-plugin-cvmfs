@@ -30,8 +30,8 @@ from subprocess import CompletedProcess
 # settings.
 @dataclass
 class SoftwareDeploymentSettings(SoftwareDeploymentSettingsBase):
-    cvmfs_repositories: Optional[str] = field(
-        default="atlas.cern.ch,grid.cern.ch",
+    repositories: Optional[str] = field(
+        default="atlas.cern.ch",
         metadata={
             "help": "CVMFS_REPOSITORIES to mount.",
             "env_var": True,
@@ -39,12 +39,12 @@ class SoftwareDeploymentSettings(SoftwareDeploymentSettingsBase):
         },
     )
 
-    cvmfs_client_profile: Optional[str] = field(
+    client_profile: Optional[str] = field(
         default="single",
         metadata={"help": "CVMFS_CLIENT_PROFILE.", "env_var": True, "required": True},
     )
 
-    cvmfs_http_proxy: Optional[str] = field(
+    http_proxy: Optional[str] = field(
         default="direct",
         metadata={"help": "CVMFS_HTTP_PROXY", "env_var": True, "required": True},
     )
@@ -96,33 +96,32 @@ class Env(EnvBase):
     # futher stuff.
 
     def __post_init__(self) -> None:
+        self.config_probe()
         self.check()
 
     def inject_cvmfs_envvars(self) -> dict:
         env = {}
         env.update(os.environ)
-        env["CVMS_REPOSITORIES"] = self.settings.cvmfs_repositories
-        env["CVMS_CLIENT_PROFILE"] = self.settings.cvmfs_client_profile
-        env["CVMS_HTTP_PROXY"] = self.settings.cvmfs_http_proxy
+        env["CVMFS_REPOSITORIES"] = self.settings.repositories
+        env["CVMFS_CLIENT_PROFILE"] = self.settings.client_profile
+        env["CVMFS_HTTP_PROXY"] = self.settings.http_proxy
         # print(env)
         return env
 
-    @EnvBase.once
-    def cvmfs_config_setup(self) -> None:
-        if (
-            self.run_cmd(
-                "cvmfs_config setup",
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                env=self.inject_cvmfs_envvars(),
-            ).returncode
-            != 0
-        ):
-            raise WorkflowError("Failed to cvfs_config setup.")
-
-    def cvmfs_config_probe(self) -> CompletedProcess:
+    def config_probe(self) -> CompletedProcess:
+        # print(self.inject_cvmfs_envvars())
         cp = self.run_cmd(
             "cvmfs_config probe",
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=self.inject_cvmfs_envvars(),
+        )
+
+        return cp
+
+    def try_module_tool(self) -> CompletedProcess:
+        cp = self.run_cmd(
+            "type module",
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env=self.inject_cvmfs_envvars(),
@@ -133,30 +132,24 @@ class Env(EnvBase):
     # in case multiple environments of the same kind are created.
     @EnvBase.once
     def check(self) -> None:
-        if (
-            self.run_cmd(
-                "type module",
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                env=self.inject_cvmfs_envvars(),
-            ).returncode
-            != 0
-        ):
-            raise WorkflowError("The `module` command is not available.")
-        if (
-            self.run_cmd(
-                "cvmfs_config",
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                env=self.inject_cvmfs_envvars(),
-            ).returncode
-            != 0
-        ):
-            raise WorkflowError("The `cvmfs_config` command is not available.")
-        if self.cvmfs_config_probe().returncode != 0:
+        if self.try_module_tool().returncode != 0:
+            raise WorkflowError("Failed to find a `module` tool.")
+        cp = self.config_probe()
+        if cp.returncode != 0:
+            print(cp.stdout)
+            print(cp.stderr)
             raise WorkflowError(
-                f"Failed to mount the cvmfs repository {' '.join(self.settings.cvmfs_repositories)}."
+                f"Failed to probe the cvmfs repositories {''.join(self.settings.repositories)}."
             )
+        for repo in self.settings.repositories.split(","):
+            cp = self.run_cmd(
+                f"cvmfs_config stat {repo}",
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env=self.inject_cvmfs_envvars(),
+            )
+            if cp.returncode != 0:
+                raise WorkflowError(f"Failed to stat the cvmfs repository {repo}")
 
     def decorate_shellcmd(self, cmd: str) -> str:
         # Decorate given shell command such that it runs within the environment.
