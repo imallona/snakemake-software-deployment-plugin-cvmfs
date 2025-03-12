@@ -111,7 +111,7 @@ class Env(EnvBase):
     def config_probe(self) -> CompletedProcess:
         # print(self.inject_cvmfs_envvars())
         cp = self.run_cmd(
-            f"cvmfs_config probe",
+            "cvmfs_config probe",
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env=self.inject_cvmfs_envvars(),

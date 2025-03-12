@@ -16,7 +16,7 @@
 
 To specify the cvmfs repositories to be mounted and other parameters this plugin modifies the Snakemake CLI to incorporate three new parameters:
 
-1. `--sdm-snakemake-software-deployment-plugin-cvmfs-repositories` specifying `CVMFS_REPOSITORIES` to mount. Defaults to `atlas.cern.ch,grid.cern.ch`.
+1. `--sdm-snakemake-software-deployment-plugin-cvmfs-repositories` specifying `CVMFS_REPOSITORIES` to mount. Defaults to `atlas.cern.ch`.
 2. `--sdm-snakemake-software-deployment-plugin-cvmfs-client-profile` specifying `CVMFS_CLIENT_PROFILE`  Defaults to `single`. 
 3. `--sdm-snakemake-software-deployment-plugin-cvmfs-http-proxy` specifying `CVMFS_HTTP_PROXY`  Defaults to `direct`. 
 
