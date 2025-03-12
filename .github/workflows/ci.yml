@@ -90,9 +90,11 @@ jobs:
           # cvmfs_config chksetup
           df -Th
 
-      - name: Run pytest - with sftp.cern.ch
+      - name: Run pytest - with test_plugin.py different cernvmfs 
         run: |
+          source /etc/profile.d/modules.sh
           poetry run coverage run -m pytest
+          df -Th
 
       - name: Run Coverage
         run: poetry run coverage report -m
