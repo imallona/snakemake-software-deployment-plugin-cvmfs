@@ -41,12 +41,12 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
         self,
     ) -> Optional[SoftwareDeploymentSettingsBase]:
         return SoftwareDeploymentSettings(
-            repositories="pilot.eessi-hpc.org",
+            repositories="software.eessi.io",
             client_profile="single",
-            http_proxy="direct",
+            http_proxy="auto",
         )
 
     def get_test_cmd(self) -> str:
         # Return a test command that should be executed within the environment
         # with exit code 0 (i.e. without error).
-        return "cvmfs_config showconfig alice.cern.ch"
+        return "cvmfs_config showconfig software.eessi.io"

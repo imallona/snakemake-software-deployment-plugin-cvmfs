@@ -111,11 +111,12 @@ class Env(EnvBase):
     def config_probe(self) -> CompletedProcess:
         # print(self.inject_cvmfs_envvars())
         cp = self.run_cmd(
-            f"echo {self.settings.repositories}; cvmfs_config probe",
+            f"cvmfs_config probe",
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env=self.inject_cvmfs_envvars(),
         )
+        
         return cp
 
     def try_module_tool(self) -> CompletedProcess:
@@ -133,9 +134,12 @@ class Env(EnvBase):
     def check(self) -> None:
         if self.try_module_tool().returncode != 0:
             raise WorkflowError("Failed to find a `module` tool.")
-        if self.config_probe().returncode != 0:
+        cp = self.config_probe()
+        if cp.returncode != 0:
+            print(cp.stdout)
+            print(cp.stderr)
             raise WorkflowError(
-                f"Failed to probe the cvmfs repositor[y/ies] {''.join(self.settings.repositories)}."
+                f"Failed to probe the cvmfs repositories {''.join(self.settings.repositories)}."
             )
         for repo in self.settings.repositories.split(","):
             cp = self.run_cmd(
@@ -145,7 +149,7 @@ class Env(EnvBase):
                 env=self.inject_cvmfs_envvars(),
             )
             if cp.returncode != 0:
-                raise WorkflowError(f"Failed to mount the cvmfs repository {repo}")
+                raise WorkflowError(f"Failed to stat the cvmfs repository {repo}")
 
     def decorate_shellcmd(self, cmd: str) -> str:
         # Decorate given shell command such that it runs within the environment.
