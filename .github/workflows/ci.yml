@@ -79,9 +79,21 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
-      - name: Run pytest
+      - name: Check cvmfs 
         run: |
           source /etc/profile.d/modules.sh
+          sudo cvmfs_config setup
+          export CVMFS_HTTP_PROXY=direct
+          export CVMFS_CLIENT_PROFILE=single
+          export CVMFS_REPOSITORIES='alice-ocdb.cern.ch,alice.cern.ch,sft.cern.ch'
+          cvmfs_config probe
+          cvmfs_config chksetup
+          df -Th
+
+      - name: Run pytest
+        run: |
+          df -Th
+          export | grep CVMS        
           poetry run coverage run -m pytest
 
       - name: Run Coverage
