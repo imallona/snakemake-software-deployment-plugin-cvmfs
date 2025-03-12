@@ -109,6 +109,7 @@ class Env(EnvBase):
         return env
 
     def config_probe(self) -> CompletedProcess:
+        # print(self.inject_cvmfs_envvars())
         cp = self.run_cmd(
             "cvmfs_config probe",
             stdout=subprocess.PIPE,
@@ -134,7 +135,7 @@ class Env(EnvBase):
             raise WorkflowError("Failed to find a `module` tool.")
         if self.config_probe().returncode != 0:
             raise WorkflowError(
-                f"Failed to probe the cvmfs repositor[y/ies] {' '.join(self.settings.cvmfs_repositories)}."
+                f"Failed to probe the cvmfs repositor[y/ies] {''.join(self.settings.repositories)}."
             )
         for repo in self.settings.repositories.split(","):
             cp = self.run_cmd(

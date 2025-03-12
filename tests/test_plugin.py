@@ -31,7 +31,7 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
         # If the software deployment provider does not support deployable environments,
         # this method should return an existing environment spec that can be used
         # for testing
-        return EnvSpec("module whatis lmod")
+        return EnvSpec("module avail lmod")
 
     def get_env_cls(self) -> Type[EnvBase]:
         # Return the environment class that should be tested.
