@@ -41,7 +41,7 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
         self,
     ) -> Optional[SoftwareDeploymentSettingsBase]:
         return SoftwareDeploymentSettings(
-            repositories="alice.cern.ch",
+            repositories="pilot.eessi-hpc.org",
             client_profile="single",
             http_proxy="direct",
         )
