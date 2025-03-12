@@ -102,16 +102,16 @@ class Env(EnvBase):
     def inject_cvmfs_envvars(self) -> dict:
         env = {}
         env.update(os.environ)
-        env["CVMS_REPOSITORIES"] = self.settings.repositories
-        env["CVMS_CLIENT_PROFILE"] = self.settings.client_profile
-        env["CVMS_HTTP_PROXY"] = self.settings.http_proxy
+        env["CVMFS_REPOSITORIES"] = self.settings.repositories
+        env["CVMFS_CLIENT_PROFILE"] = self.settings.client_profile
+        env["CVMFS_HTTP_PROXY"] = self.settings.http_proxy
         # print(env)
         return env
 
     def config_probe(self) -> CompletedProcess:
         # print(self.inject_cvmfs_envvars())
         cp = self.run_cmd(
-            "cvmfs_config probe",
+            f"echo {self.settings.repositories}; cvmfs_config probe",
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env=self.inject_cvmfs_envvars(),
