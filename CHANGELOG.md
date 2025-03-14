@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/imallona/snakemake-software-deployment-plugin-cvmfs/compare/v0.1.0...v0.2.0) (2025-03-14)
+
+
+### Features
+
+* automate releases to pypi ([ddd3efe](https://github.com/imallona/snakemake-software-deployment-plugin-cvmfs/commit/ddd3efe96b5b6c690d9a81df5b730528c029c525))
+
 ## 0.1.0 (2025-03-14)
 
 
