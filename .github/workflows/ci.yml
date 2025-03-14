@@ -93,10 +93,11 @@ jobs:
       - name: Load custom local module
         run : |
           source /etc/profile.d/modules.sh
-          export MODULEPATH="$GITHUB_WORKSPACE"/tests:$MODULEPATH          
-          find $GITHUB_WORKSPACE -name "a_module.lua"
+          # export MODULEPATH="$GITHUB_WORKSPACE"/tests:$MODULEPATH          
+          # find $GITHUB_WORKSPACE -name "a_module.lua"
+          module use "$GITHUB_WORKSPACE"/tests
           module avail
-          module load a_module
+          # module load a_module
           
       - name: Run pytest with EESSI
         run: |
