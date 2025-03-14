@@ -159,6 +159,8 @@ class CvmfsEnv(EnvBase):
         # Decorate given shell command such that it runs within the environment.
         if "software.eessi.io" in self.settings.repositories:
             return f"source /cvmfs/software.eessi.io/versions/2023.06/init/bash; {cmd}"
+        elif "soft.computecanada.ca" in self.settings.repositories:
+            return f"source /cvmfs/soft.computecanada.ca/config/profile/bash.sh; {cmd}"
         else:
             return f"module use {self.inject_cvmfs_envvars()['MODULEPATH']}; {cmd}"
 
