@@ -26,7 +26,7 @@ from src.snakemake_software_deployment_plugin_cvmfs import (
 # This way, you can implement multiple test scenarios.
 # For each subclass, the test suite tests the environment activation and execution
 # within, and, if applicable, environment deployment and archiving.
-class TestSoftwareDeployment(TestSoftwareDeploymentBase):
+class TestEessi(TestSoftwareDeploymentBase):
     __test__ = True  # activate automatic testing
     # optional, default is "bash" change if your test suite requires a different
     # shell or you want to have multiple instance of this class testing various shells
@@ -57,12 +57,26 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
         return "cvmfs_config showconfig software.eessi.io"
 
 
-# ## custom test cases
+class TestLocalModule(TestSoftwareDeploymentBase):
+    __test__ = True  # activate automatic testing
+    # optional, default is "bash" change if your test suite requires a different
+    # shell or you want to have multiple instance of this class testing various shells
+    shell_executable = "bash"
+    repositories = "software.eessi.io,alice.cern.ch"
+    modulepath = Path(__file__) / "a_module.lua"
 
-# class TestModuleLoad(TestSoftwareDeploymentBase):
-#     __test__ = True  # activate automatic testing
+    def get_env_spec(self) -> EnvSpecBase:
+        return CvmfsEnvSpec(self.repositories)
 
-#     modulepath = os.environ['MODULEPATH']
+    def get_env_cls(self) -> Type[EnvBase]:
+        return CvmfsEnv
 
-#     def test_module_load(self, module = 'a_module'):
-#         cp = self.load_module(module = module)
+    def get_software_deployment_provider_settings(
+        self,
+    ) -> Optional[SoftwareDeploymentSettingsBase]:
+        return CvmfsSettings(repositories=self.repositories)
+
+    def get_test_cmd(self) -> str:
+        # Return a test command that should be executed within the environment
+        # with exit code 0 (i.e. without error).
+        return "module load a_module"

@@ -148,13 +148,13 @@ class CvmfsEnv(EnvBase):
         )
         return cp
 
-    def load_module(self, module: str) -> CompletedProcess:
-        self.run_cmd(
-            f"module load {module}",
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            env=self.inject_cvmfs_envvars(),
-        )
+    # def load_module(self, module: str) -> CompletedProcess:
+    #     self.run_cmd(
+    #         f"module purge && module load {module}",
+    #         stdout=subprocess.PIPE,
+    #         stderr=subprocess.PIPE,
+    #         env=self.inject_cvmfs_envvars(),
+    #     )
 
     # The decorator ensures that the decorated method is only called once
     # in case multiple environments of the same kind are created.
