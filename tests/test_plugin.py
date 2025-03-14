@@ -56,7 +56,7 @@ class TestEessiModule(TestSoftwareDeploymentBase):
     # optional, default is "bash" change if your test suite requires a different
     # shell or you want to have multiple instance of this class testing various shells
     shell_executable = "bash"
-    repositories = "software.eessi"
+    repositories = "software.eessi.io"
 
     def get_env_spec(self) -> EnvSpecBase:
         return CvmfsEnvSpec(self.repositories)
@@ -70,10 +70,7 @@ class TestEessiModule(TestSoftwareDeploymentBase):
         return CvmfsSettings(repositories=self.repositories)
 
     def get_test_cmd(self) -> str:
-        # Return a test command that should be executed within the environment
-        # with exit code 0 (i.e. without error).
-        # return "echo $MODULEPATH; pwd ; ls"
-        return "source /cvmfs/software.eessi.io/versions/2023.06/init/bash && module load TensorFlow/2.13.0-foss-2023a"
+        return "module load TensorFlow/2.13.0-foss-2023a"
 
 
 # class TestLocalModule(TestSoftwareDeploymentBase):
