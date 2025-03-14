@@ -1,14 +1,13 @@
 import subprocess
 import os
 from dataclasses import dataclass, field
-from typing import Iterable, Optional, Tuple
+from typing import Iterable, Optional
 from snakemake_interface_software_deployment_plugins.settings import (
     SoftwareDeploymentSettingsBase,
 )
 from snakemake_interface_software_deployment_plugins import (
     EnvBase,
     EnvSpecBase,
-    EnvSpecSourceFile,
     SoftwareReport,
 )
 

@@ -1,15 +1,12 @@
 from typing import Optional, Type
 from pathlib import Path
 
-import os
-
 from snakemake_interface_software_deployment_plugins.tests import (
     TestSoftwareDeploymentBase,
 )
 from snakemake_interface_software_deployment_plugins import (
     EnvSpecBase,
-    EnvBase,
-    EnvSpecSourceFile,
+    EnvBase
 )
 from snakemake_interface_software_deployment_plugins.settings import (
     SoftwareDeploymentSettingsBase,
@@ -79,4 +76,5 @@ class TestLocalModule(TestSoftwareDeploymentBase):
     def get_test_cmd(self) -> str:
         # Return a test command that should be executed within the environment
         # with exit code 0 (i.e. without error).
-        return "module spider a_module"
+        #return "echo $MODULEPATH; pwd ; ls"
+        return "echo $MODULEPATH; module load archspec"
