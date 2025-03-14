@@ -65,24 +65,6 @@ class CvmfsSettings(SoftwareDeploymentSettingsBase):
 
 
 class CvmfsEnvSpec(EnvSpecBase):
-    # This class should implement something that describes an existing or to be created
-    # environment.
-    # It will be automatically added to the environment object when the environment is
-    # created or loaded and is available there as attribute self.spec.
-    # Use either __init__ with type annotations or dataclass attributes to define the
-    # spec.
-    # Any attributes that shall hold paths that are interpreted as relative to the
-    # workflow source (e.g. the path to an environment definition file), have to be
-    # defined as snakemake_interface_software_deployment_plugins.EnvSpecSourceFile.
-    # The reason is that Snakemake internally has to convert them from potential
-    # URLs or filesystem paths to cached versions.
-    # In the Env class below, they have to be accessed as EnvSpecSourceFile.cached
-    # (of type Path), when checking for existence. In case errors shall be thrown,
-    # the attribute EnvSpecSourceFile.path_or_uri (of type str) can be used to show
-    # the original value passed to the EnvSpec.
-
-    # envfile: Optional[EnvSpecSourceFile] = None
-
     def __init__(self, *repositories: str):
         super().__init__()
         self.repositories: str = repositories
@@ -100,11 +82,6 @@ class CvmfsEnvSpec(EnvSpecBase):
         return ()
 
 
-# Required:
-# Implementation of an environment object.
-# If your environment cannot be archived or deployed, remove the respective methods
-# and the respective base classes.
-# All errors should be wrapped with snakemake-interface-common.errors.WorkflowError
 class CvmfsEnv(EnvBase):
     # For compatibility with future changes, you should not overwrite the __init__
     # method. Instead, use __post_init__ to set additional attributes and initialize
@@ -180,7 +157,10 @@ class CvmfsEnv(EnvBase):
 
     def decorate_shellcmd(self, cmd: str) -> str:
         # Decorate given shell command such that it runs within the environment.
-        return f"module use {self.inject_cvmfs_envvars()['MODULEPATH']}; {cmd}"
+        if "software.eessi.io" in self.settings.repositories:
+            return f"source /cvmfs/software.eessi.io/versions/2023.06/init/bash; {cmd}"
+        else:
+            return f"module use {self.inject_cvmfs_envvars()['MODULEPATH']}; {cmd}"
 
     def record_hash(self, hash_object) -> None:
         ## the environment reflects both the modulepath and the modulename(s)
@@ -189,54 +169,4 @@ class CvmfsEnv(EnvBase):
         )
 
     def report_software(self) -> Iterable[SoftwareReport]:
-        # cp = self.run_cmd(
-        #     f"module whatis {self.spec.names}",
-        #     text=True,
-        #     stdout=subprocess.PIPE,
-        #     env=self.inject_cvmfs_envvars(),
-        # )
-        # if cp.returncode != 0:
-        #     raise WorkflowError(f"Error trying to module whatis {self.spec.names}.")
-        #     return ()
-        # else:
-        #     return SoftwareReport(name=self.spec.names, version=cp.stdout)
         return ()
-
-    # # The methods below are optional. Remove them if not needed and adjust the
-    # # base classes above.
-
-    # async def deploy(self) -> None:
-    #     # Remove method if not deployable!
-    #     # Deploy the environment to self.deployment_path, using self.spec
-    #     # (the EnvSpec object).
-
-    #     # When issuing shell commands, the environment should use
-    #     # self.run_cmd(cmd: str) -> subprocess.CompletedProcess in order to ensure that
-    #     # it runs within eventual parent environments (e.g. a container or an env
-    #     # module).
-    #     pass
-
-    # def is_deployment_path_portable(self) -> bool:
-    #     # Remove method if not deployable!
-    #     # Return True if the deployment is portable, i.e. can be moved to a
-    #     # different location without breaking the environment. Return False otherwise.
-    #     # For example, with conda, environments are not portable in that sense (cannot
-    #     # be moved around, because deployed packages contain hardcoded absolute
-    #     # RPATHs).
-    #     pass
-
-    # def remove(self) -> None:
-    #     # Remove method if not deployable!
-    #     # Remove the deployed environment from self.deployment_path and perform
-    #     # any additional cleanup.
-    #     pass
-
-    # async def archive(self) -> None:
-    #     # Remove method if not archiveable!
-    #     # Archive the environment to self.archive_path.
-
-    #     # When issuing shell commands, the environment should use
-    #     # self.run_cmd(cmd: str) -> subprocess.CompletedProcess in order to ensure that
-    #     # it runs within eventual parent environments (e.g. a container or an env
-    #     # module).
-    #     pass
