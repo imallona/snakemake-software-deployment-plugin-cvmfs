@@ -63,7 +63,7 @@ class TestLocalModule(TestSoftwareDeploymentBase):
     # shell or you want to have multiple instance of this class testing various shells
     shell_executable = "bash"
     repositories = "software.eessi.io,alice.cern.ch"
-    modulepath = Path(__file__) / "a_module.lua"
+    modulepath = Path(__file__).parent
 
     def get_env_spec(self) -> EnvSpecBase:
         return CvmfsEnvSpec(self.repositories)
@@ -79,4 +79,4 @@ class TestLocalModule(TestSoftwareDeploymentBase):
     def get_test_cmd(self) -> str:
         # Return a test command that should be executed within the environment
         # with exit code 0 (i.e. without error).
-        return "module load a_module"
+        return "module spider a_module"
