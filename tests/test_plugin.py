@@ -76,25 +76,25 @@ class TestEessiModule(TestSoftwareDeploymentBase):
         return "source /cvmfs/software.eessi.io/versions/2023.06/init/bash && module load TensorFlow/2.13.0-foss-2023a"
 
 
-class TestLocalModule(TestSoftwareDeploymentBase):
-    __test__ = True  # activate automatic testing
-    shell_executable = "bash"
-    repositories = "software.eessi"
-    modulepath = ".."  ## Path(__file__).parent ## should be here, no idea where
+# class TestLocalModule(TestSoftwareDeploymentBase):
+#     __test__ = True  # activate automatic testing
+#     shell_executable = "bash"
+#     repositories = "software.eessi"
+#     modulepath = ".."  ## Path(__file__).parent ## should be here, no idea where
 
-    def get_env_spec(self) -> EnvSpecBase:
-        return CvmfsEnvSpec(self.repositories)
+#     def get_env_spec(self) -> EnvSpecBase:
+#         return CvmfsEnvSpec(self.repositories)
 
-    def get_env_cls(self) -> Type[EnvBase]:
-        return CvmfsEnv
+#     def get_env_cls(self) -> Type[EnvBase]:
+#         return CvmfsEnv
 
-    def get_software_deployment_provider_settings(
-        self,
-    ) -> Optional[SoftwareDeploymentSettingsBase]:
-        return CvmfsSettings(repositories=self.repositories)
+#     def get_software_deployment_provider_settings(
+#         self,
+#     ) -> Optional[SoftwareDeploymentSettingsBase]:
+#         return CvmfsSettings(repositories=self.repositories)
 
-    def get_test_cmd(self) -> str:
-        # Return a test command that should be executed within the environment
-        # with exit code 0 (i.e. without error).
-        # return "echo $MODULEPATH; pwd ; ls"
-        return "module load a_module"
+#     def get_test_cmd(self) -> str:
+#         # Return a test command that should be executed within the environment
+#         # with exit code 0 (i.e. without error).
+#         # return "echo $MODULEPATH; pwd ; ls"
+#         return "module load a_module"

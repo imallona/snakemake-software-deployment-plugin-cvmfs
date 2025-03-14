@@ -90,14 +90,13 @@ jobs:
           # cvmfs_config chksetup
           df -Th
 
-      - name: Load custom local module
+      - name: Load local module
         run : |
           source /etc/profile.d/modules.sh
           # export MODULEPATH="$GITHUB_WORKSPACE"/tests:$MODULEPATH          
-          # find $GITHUB_WORKSPACE -name "a_module.lua"
-          module use "$GITHUB_WORKSPACE"/tests
+          # module use "$GITHUB_WORKSPACE"/tests
           module avail
-          # module load a_module
+          module load dot
           
       - name: Run pytest with EESSI
         run: |
