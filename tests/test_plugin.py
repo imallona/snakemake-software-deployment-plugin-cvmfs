@@ -82,7 +82,7 @@ class TestLocalModule(TestSoftwareDeploymentBase):
     # shell or you want to have multiple instance of this class testing various shells
     shell_executable = "bash"
     repositories = "software.eessi"
-    modulepath = "${GITHUB_WORKSPACE}/tests"  ##Path(__file__).parent
+    modulepath = Path(__file__).parent
 
     def get_env_spec(self) -> EnvSpecBase:
         return CvmfsEnvSpec(self.repositories)
@@ -99,4 +99,4 @@ class TestLocalModule(TestSoftwareDeploymentBase):
         # Return a test command that should be executed within the environment
         # with exit code 0 (i.e. without error).
         # return "echo $MODULEPATH; pwd ; ls"
-        return "module load a_module"
+        return "module avail && module show a_module"
