@@ -53,8 +53,6 @@ class TestEessi(TestSoftwareDeploymentBase):
 
 class TestEessiModule(TestSoftwareDeploymentBase):
     __test__ = True  # activate automatic testing
-    # optional, default is "bash" change if your test suite requires a different
-    # shell or you want to have multiple instance of this class testing various shells
     shell_executable = "bash"
     repositories = "software.eessi.io"
 
@@ -71,6 +69,26 @@ class TestEessiModule(TestSoftwareDeploymentBase):
 
     def get_test_cmd(self) -> str:
         return "module load TensorFlow/2.13.0-foss-2023a"
+
+
+class TestComputeCanadaModule(TestSoftwareDeploymentBase):
+    __test__ = True  # activate automatic testing
+    shell_executable = "bash"
+    repositories = "soft.computecanada.ca"
+
+    def get_env_spec(self) -> EnvSpecBase:
+        return CvmfsEnvSpec(self.repositories)
+
+    def get_env_cls(self) -> Type[EnvBase]:
+        return CvmfsEnv
+
+    def get_software_deployment_provider_settings(
+        self,
+    ) -> Optional[SoftwareDeploymentSettingsBase]:
+        return CvmfsSettings(repositories=self.repositories)
+
+    def get_test_cmd(self) -> str:
+        return "module load alevin-fry"
 
 
 # class TestLocalModule(TestSoftwareDeploymentBase):
