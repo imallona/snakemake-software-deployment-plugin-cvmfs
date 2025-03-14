@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/imallona/snakemake-software-deployment-plugin-cvmfs/compare/v0.2.1...v0.2.2) (2025-03-14)
+
+
+### Bug Fixes
+
+* switch to pypi token ([ab2ca53](https://github.com/imallona/snakemake-software-deployment-plugin-cvmfs/commit/ab2ca5309033bdc1f01b11efba7015a10104dc16))
+
 ## [0.2.1](https://github.com/imallona/snakemake-software-deployment-plugin-cvmfs/compare/v0.2.0...v0.2.1) (2025-03-14)
 
 
