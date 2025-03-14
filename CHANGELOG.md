@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/imallona/snakemake-software-deployment-plugin-cvmfs/compare/v0.2.2...v0.2.3) (2025-03-14)
+
+
+### Bug Fixes
+
+* update pypi secrets again ([5fad465](https://github.com/imallona/snakemake-software-deployment-plugin-cvmfs/commit/5fad4655c45dc9e28b794e5d7c7d2da2b99cee43))
+
 ## [0.2.2](https://github.com/imallona/snakemake-software-deployment-plugin-cvmfs/compare/v0.2.1...v0.2.2) (2025-03-14)
 
 
