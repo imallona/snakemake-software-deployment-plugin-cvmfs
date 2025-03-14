@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/imallona/snakemake-software-deployment-plugin-cvmfs/compare/v0.2.0...v0.2.1) (2025-03-14)
+
+
+### Bug Fixes
+
+* switch pypi authentication to pass ([13d9bf4](https://github.com/imallona/snakemake-software-deployment-plugin-cvmfs/commit/13d9bf42680bb8fd861f50ae867942afc6cc34fb))
+
 ## [0.2.0](https://github.com/imallona/snakemake-software-deployment-plugin-cvmfs/compare/v0.1.0...v0.2.0) (2025-03-14)
 
 
