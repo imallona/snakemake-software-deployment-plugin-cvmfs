@@ -1,10 +1,15 @@
 from typing import Optional, Type
+from pathlib import Path
+
+import os
+
 from snakemake_interface_software_deployment_plugins.tests import (
     TestSoftwareDeploymentBase,
 )
 from snakemake_interface_software_deployment_plugins import (
     EnvSpecBase,
     EnvBase,
+    EnvSpecSourceFile
 )
 from snakemake_interface_software_deployment_plugins.settings import (
     SoftwareDeploymentSettingsBase,
@@ -31,8 +36,10 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
         # If the software deployment provider does not support deployable environments,
         # this method should return an existing environment spec that can be used
         # for testing
-        return EnvSpec("module avail lmod")
-
+        return EnvSpec(
+            envfile=EnvSpecSourceFile(Path(__file__).parent / "a_module.lua")
+        )
+    
     def get_env_cls(self) -> Type[EnvBase]:
         # Return the environment class that should be tested.
         return Env
@@ -50,3 +57,13 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
         # Return a test command that should be executed within the environment
         # with exit code 0 (i.e. without error).
         return "cvmfs_config showconfig software.eessi.io"
+
+## custom test cases
+
+class TestModuleLoad(TestSoftwareDeploymentBase):
+    __test__ = True  # activate automatic testing
+
+    modulepath = os.environ['MODULEPATH']
+    
+    def test_module_load(self, module = 'a_module'):
+        cp = self.load_module(module = module)

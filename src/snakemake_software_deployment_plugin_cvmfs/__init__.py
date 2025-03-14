@@ -8,7 +8,8 @@ from snakemake_interface_software_deployment_plugins.settings import (
 from snakemake_interface_software_deployment_plugins import (
     EnvBase,
     EnvSpecBase,
-    SoftwareReport,
+    EnvSpecSourceFile,
+    SoftwareReport
 )
 
 # Raise errors that will not be handled within this plugin but thrown upwards to
@@ -49,6 +50,16 @@ class SoftwareDeploymentSettings(SoftwareDeploymentSettingsBase):
         metadata={"help": "CVMFS_HTTP_PROXY", "env_var": True, "required": True},
     )
 
+    # module_tool: Optional[str] = field(
+    #     default="Lmod",
+    #     metadata={"help": "Module tool to use, i.e. Lmod or environment-modules", "env_var": False, "required": False},
+    # )
+
+    modulepath: Optional[str] = field(
+        default=os.environ['MODULEPATH'],
+        metadata={"help": "Path were the CVMFS-shared modulefiles are stored.",
+                  "env_var": True, "required": True},
+    )
 
 class EnvSpec(EnvSpecBase):
     # This class should implement something that describes an existing or to be created
@@ -67,6 +78,8 @@ class EnvSpec(EnvSpecBase):
     # the attribute EnvSpecSourceFile.path_or_uri (of type str) can be used to show
     # the original value passed to the EnvSpec.
 
+    envfile: Optional[EnvSpecSourceFile] = None
+    
     def __init__(self, *names: str):
         super().__init__()
         self.names: Tuple[str] = names
@@ -74,6 +87,7 @@ class EnvSpec(EnvSpecBase):
     ## these are module names
     @classmethod
     def identity_attributes(self) -> Iterable[str]:
+        yield "envfile"
         yield "names"
 
     @classmethod
@@ -99,13 +113,17 @@ class Env(EnvBase):
         self.config_probe()
         self.check()
 
+    def append_modulepath(self) -> str:
+        return(':'.join([self.settings.modulepath, os.environ['MODULEPATH']]))
+    
     def inject_cvmfs_envvars(self) -> dict:
         env = {}
         env.update(os.environ)
         env["CVMFS_REPOSITORIES"] = self.settings.repositories
         env["CVMFS_CLIENT_PROFILE"] = self.settings.client_profile
         env["CVMFS_HTTP_PROXY"] = self.settings.http_proxy
-        # print(env)
+        if self.settings.modulepath is not os.environ['MODULEPATH']:
+            env["MODULEPATH"] = self.append_modulepath()
         return env
 
     def config_probe(self) -> CompletedProcess:
@@ -128,6 +146,14 @@ class Env(EnvBase):
         )
         return cp
 
+    def load_module(self, module: str) -> CompletedProcess:
+        self.run_cmd(
+            f"module load {module}",
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=self.inject_cvmfs_envvars(),
+        )
+     
     # The decorator ensures that the decorated method is only called once
     # in case multiple environments of the same kind are created.
     @EnvBase.once
