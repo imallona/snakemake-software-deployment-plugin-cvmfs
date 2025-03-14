@@ -180,7 +180,7 @@ class CvmfsEnv(EnvBase):
 
     def decorate_shellcmd(self, cmd: str) -> str:
         # Decorate given shell command such that it runs within the environment.
-        return f"echo $MODULEPATH; {cmd}"
+        return f"export MODULEPATH={self.settings.modulepath}:$MODULEPATH; {cmd}"
 
     def record_hash(self, hash_object) -> None:
         ## the environment reflects both the modulepath and the modulename(s)
