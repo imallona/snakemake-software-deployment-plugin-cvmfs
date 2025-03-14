@@ -58,7 +58,7 @@ class CvmfsSettings(SoftwareDeploymentSettingsBase):
     modulepath: Optional[str] = field(
         default=os.environ['MODULEPATH'],
         metadata={"help": "Path were the CVMFS-shared modulefiles are stored.",
-                  "env_var": True, "required": True},
+                  "env_var": False, "required": False},
     )
 
 class CvmfsEnvSpec(EnvSpecBase):
@@ -112,8 +112,8 @@ class CvmfsEnv(EnvBase):
         self.config_probe()
         self.check()
 
-    # def append_modulepath(self) -> str:
-    #     return(':'.join([self.settings.modulepath, os.environ['MODULEPATH']]))
+    def append_modulepath(self) -> str:
+        return(':'.join([self.settings.modulepath, os.environ['MODULEPATH']]))
     
     def inject_cvmfs_envvars(self) -> dict:
         env = {}
@@ -121,8 +121,8 @@ class CvmfsEnv(EnvBase):
         env["CVMFS_REPOSITORIES"] = self.settings.repositories
         env["CVMFS_CLIENT_PROFILE"] = self.settings.client_profile
         env["CVMFS_HTTP_PROXY"] = self.settings.http_proxy
-        # if self.settings.modulepath is not os.environ['MODULEPATH']:
-        #     env["MODULEPATH"] = self.append_modulepath()
+        if self.settings.modulepath is not os.environ['MODULEPATH']:
+            env["MODULEPATH"] = self.append_modulepath()
         return env
 
     def config_probe(self) -> CompletedProcess:
@@ -178,11 +178,11 @@ class CvmfsEnv(EnvBase):
 
     def decorate_shellcmd(self, cmd: str) -> str:
         # Decorate given shell command such that it runs within the environment.
-        return f"module purge; module load {' '.join(self.spec.names)}; {cmd}"
+        return f"{cmd}"
 
     def record_hash(self, hash_object) -> None:
         ## the environment reflects both the modulepath and the modulename(s)
-        hash_object.update(",".join([self.spec.names, self.spec.modulepath]).encode())
+        hash_object.update(",".join([self.spec.repositories, self.spec.modulepath]).encode())
 
     def report_software(self) -> Iterable[SoftwareReport]:
         # cp = self.run_cmd(
