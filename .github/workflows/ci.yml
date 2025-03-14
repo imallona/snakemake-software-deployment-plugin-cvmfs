@@ -92,8 +92,8 @@ jobs:
 
       - name: Load custom local module
         run : |
-          export MODULEPATH="$GITHUB_WORKSPACE"/tests:$MODULEPATH
-          pwd
+          source /etc/profile.d/modules.sh
+          export MODULEPATH="$GITHUB_WORKSPACE"/tests:$MODULEPATH          
           find $GITHUB_WORKSPACE -name "a_module.lua"
           module avail
           module load a_module

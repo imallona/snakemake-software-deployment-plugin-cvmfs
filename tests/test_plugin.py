@@ -1,5 +1,5 @@
 from typing import Optional, Type
-from pathlib import Path
+# from pathlib import Path
 
 from snakemake_interface_software_deployment_plugins.tests import (
     TestSoftwareDeploymentBase,
@@ -80,7 +80,7 @@ class TestLocalModule(TestSoftwareDeploymentBase):
     __test__ = True  # activate automatic testing
     shell_executable = "bash"
     repositories = "software.eessi"
-    modulepath = Path(__file__).parent ## should be here, no idea where
+    modulepath = '..' ## Path(__file__).parent ## should be here, no idea where
 
     def get_env_spec(self) -> EnvSpecBase:
         return CvmfsEnvSpec(self.repositories)
