@@ -9,7 +9,7 @@ from snakemake_interface_software_deployment_plugins import (
     EnvBase,
     EnvSpecBase,
     EnvSpecSourceFile,
-    SoftwareReport
+    SoftwareReport,
 )
 
 # Raise errors that will not be handled within this plugin but thrown upwards to
@@ -56,10 +56,14 @@ class CvmfsSettings(SoftwareDeploymentSettingsBase):
     # )
 
     modulepath: Optional[str] = field(
-        default=os.environ['MODULEPATH'],
-        metadata={"help": "Path were the CVMFS-shared modulefiles are stored.",
-                  "env_var": False, "required": False},
+        default=os.environ["MODULEPATH"],
+        metadata={
+            "help": "Path were the CVMFS-shared modulefiles are stored.",
+            "env_var": False,
+            "required": False,
+        },
     )
+
 
 class CvmfsEnvSpec(EnvSpecBase):
     # This class should implement something that describes an existing or to be created
@@ -79,12 +83,11 @@ class CvmfsEnvSpec(EnvSpecBase):
     # the original value passed to the EnvSpec.
 
     # envfile: Optional[EnvSpecSourceFile] = None
-    
+
     def __init__(self, *repositories: str):
         super().__init__()
         self.repositories: str = repositories
 
-    
     @classmethod
     def identity_attributes(self) -> Iterable[str]:
         yield "repositories"
@@ -113,15 +116,15 @@ class CvmfsEnv(EnvBase):
         self.check()
 
     def append_modulepath(self) -> str:
-        return(':'.join([self.settings.modulepath, os.environ['MODULEPATH']]))
-    
+        return ":".join([self.settings.modulepath, os.environ["MODULEPATH"]])
+
     def inject_cvmfs_envvars(self) -> dict:
         env = {}
         env.update(os.environ)
         env["CVMFS_REPOSITORIES"] = self.settings.repositories
         env["CVMFS_CLIENT_PROFILE"] = self.settings.client_profile
         env["CVMFS_HTTP_PROXY"] = self.settings.http_proxy
-        if self.settings.modulepath is not os.environ['MODULEPATH']:
+        if self.settings.modulepath is not os.environ["MODULEPATH"]:
             env["MODULEPATH"] = self.append_modulepath()
         return env
 
@@ -152,7 +155,7 @@ class CvmfsEnv(EnvBase):
             stderr=subprocess.PIPE,
             env=self.inject_cvmfs_envvars(),
         )
-     
+
     # The decorator ensures that the decorated method is only called once
     # in case multiple environments of the same kind are created.
     @EnvBase.once
@@ -178,11 +181,13 @@ class CvmfsEnv(EnvBase):
 
     def decorate_shellcmd(self, cmd: str) -> str:
         # Decorate given shell command such that it runs within the environment.
-        return f"{cmd}"
+        return f"echo $MODULEPATH; {cmd}"
 
     def record_hash(self, hash_object) -> None:
         ## the environment reflects both the modulepath and the modulename(s)
-        hash_object.update(",".join([self.spec.repositories, self.spec.modulepath]).encode())
+        hash_object.update(
+            ",".join([self.spec.repositories, self.spec.modulepath]).encode()
+        )
 
     def report_software(self) -> Iterable[SoftwareReport]:
         # cp = self.run_cmd(

@@ -9,7 +9,7 @@ from snakemake_interface_software_deployment_plugins.tests import (
 from snakemake_interface_software_deployment_plugins import (
     EnvSpecBase,
     EnvBase,
-    EnvSpecSourceFile
+    EnvSpecSourceFile,
 )
 from snakemake_interface_software_deployment_plugins.settings import (
     SoftwareDeploymentSettingsBase,
@@ -32,7 +32,7 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
     # shell or you want to have multiple instance of this class testing various shells
     shell_executable = "bash"
     repositories = "software.eessi.io,alice.cern.ch"
-    
+
     def get_env_spec(self) -> EnvSpecBase:
         # If the software deployment provider does not support deployable environments,
         # this method should return an existing environment spec that can be used
@@ -41,7 +41,7 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
         #     envfile=EnvSpecSourceFile(Path(__file__).parent / "a_module.lua")
         # )
         return CvmfsEnvSpec(self.repositories)
-        
+
     def get_env_cls(self) -> Type[EnvBase]:
         # Return the environment class that should be tested.
         return CvmfsEnv
@@ -49,14 +49,13 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
     def get_software_deployment_provider_settings(
         self,
     ) -> Optional[SoftwareDeploymentSettingsBase]:
-        return CvmfsSettings(
-            repositories=self.repositories
-        )
+        return CvmfsSettings(repositories=self.repositories)
 
     def get_test_cmd(self) -> str:
         # Return a test command that should be executed within the environment
         # with exit code 0 (i.e. without error).
         return "cvmfs_config showconfig software.eessi.io"
+
 
 # ## custom test cases
 
@@ -64,6 +63,6 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
 #     __test__ = True  # activate automatic testing
 
 #     modulepath = os.environ['MODULEPATH']
-    
+
 #     def test_module_load(self, module = 'a_module'):
 #         cp = self.load_module(module = module)
