@@ -79,7 +79,7 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
-      - name: Check cvmfs 
+      - name: Check alice
         run: |
           source /etc/profile.d/modules.sh
           sudo cvmfs_config setup
@@ -90,7 +90,15 @@ jobs:
           # cvmfs_config chksetup
           df -Th
 
-      - name: Run pytest - with test_plugin.py different cernvmfs 
+      - name: Load local module
+        run : |
+          source /etc/profile.d/modules.sh
+          # export MODULEPATH="$GITHUB_WORKSPACE"/tests:$MODULEPATH          
+          # module use "$GITHUB_WORKSPACE"/tests
+          module avail
+          module load dot
+          
+      - name: Run pytest with EESSI
         run: |
           source /etc/profile.d/modules.sh
           poetry run coverage run -m pytest

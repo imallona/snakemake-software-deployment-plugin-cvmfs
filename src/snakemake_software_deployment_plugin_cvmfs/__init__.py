@@ -1,7 +1,7 @@
 import subprocess
 import os
 from dataclasses import dataclass, field
-from typing import Iterable, Optional, Tuple
+from typing import Iterable, Optional
 from snakemake_interface_software_deployment_plugins.settings import (
     SoftwareDeploymentSettingsBase,
 )
@@ -29,7 +29,7 @@ from subprocess import CompletedProcess
 # This way, a storage plugin can be used multiple times within a workflow with different
 # settings.
 @dataclass
-class SoftwareDeploymentSettings(SoftwareDeploymentSettingsBase):
+class CvmfsSettings(SoftwareDeploymentSettingsBase):
     repositories: Optional[str] = field(
         default="atlas.cern.ch",
         metadata={
@@ -45,12 +45,26 @@ class SoftwareDeploymentSettings(SoftwareDeploymentSettingsBase):
     )
 
     http_proxy: Optional[str] = field(
-        default="direct",
+        default="auto",
         metadata={"help": "CVMFS_HTTP_PROXY", "env_var": True, "required": True},
     )
 
+    # module_tool: Optional[str] = field(
+    #     default="Lmod",
+    #     metadata={"help": "Module tool to use, i.e. Lmod or environment-modules", "env_var": False, "required": False},
+    # )
 
-class EnvSpec(EnvSpecBase):
+    modulepath: Optional[str] = field(
+        default=os.environ["MODULEPATH"],
+        metadata={
+            "help": "Path were the CVMFS-shared modulefiles are stored.",
+            "env_var": False,
+            "required": False,
+        },
+    )
+
+
+class CvmfsEnvSpec(EnvSpecBase):
     # This class should implement something that describes an existing or to be created
     # environment.
     # It will be automatically added to the environment object when the environment is
@@ -67,14 +81,15 @@ class EnvSpec(EnvSpecBase):
     # the attribute EnvSpecSourceFile.path_or_uri (of type str) can be used to show
     # the original value passed to the EnvSpec.
 
-    def __init__(self, *names: str):
-        super().__init__()
-        self.names: Tuple[str] = names
+    # envfile: Optional[EnvSpecSourceFile] = None
 
-    ## these are module names
+    def __init__(self, *repositories: str):
+        super().__init__()
+        self.repositories: str = repositories
+
     @classmethod
     def identity_attributes(self) -> Iterable[str]:
-        yield "names"
+        yield "repositories"
 
     @classmethod
     def source_path_attributes(cls) -> Iterable[str]:
@@ -90,7 +105,7 @@ class EnvSpec(EnvSpecBase):
 # If your environment cannot be archived or deployed, remove the respective methods
 # and the respective base classes.
 # All errors should be wrapped with snakemake-interface-common.errors.WorkflowError
-class Env(EnvBase):
+class CvmfsEnv(EnvBase):
     # For compatibility with future changes, you should not overwrite the __init__
     # method. Instead, use __post_init__ to set additional attributes and initialize
     # futher stuff.
@@ -99,13 +114,17 @@ class Env(EnvBase):
         self.config_probe()
         self.check()
 
+    def append_modulepath(self) -> str:
+        return ":".join([self.settings.modulepath, os.environ["MODULEPATH"]])
+
     def inject_cvmfs_envvars(self) -> dict:
         env = {}
         env.update(os.environ)
         env["CVMFS_REPOSITORIES"] = self.settings.repositories
         env["CVMFS_CLIENT_PROFILE"] = self.settings.client_profile
         env["CVMFS_HTTP_PROXY"] = self.settings.http_proxy
-        # print(env)
+        if self.settings.modulepath is not os.environ["MODULEPATH"]:
+            env["MODULEPATH"] = self.append_modulepath()
         return env
 
     def config_probe(self) -> CompletedProcess:
@@ -127,6 +146,14 @@ class Env(EnvBase):
             env=self.inject_cvmfs_envvars(),
         )
         return cp
+
+    # def load_module(self, module: str) -> CompletedProcess:
+    #     self.run_cmd(
+    #         f"module purge && module load {module}",
+    #         stdout=subprocess.PIPE,
+    #         stderr=subprocess.PIPE,
+    #         env=self.inject_cvmfs_envvars(),
+    #     )
 
     # The decorator ensures that the decorated method is only called once
     # in case multiple environments of the same kind are created.
@@ -153,11 +180,13 @@ class Env(EnvBase):
 
     def decorate_shellcmd(self, cmd: str) -> str:
         # Decorate given shell command such that it runs within the environment.
-        return f"module purge; module load {' '.join(self.spec.names)}; {cmd}"
+        return f"module use {self.inject_cvmfs_envvars()['MODULEPATH']}; {cmd}"
 
     def record_hash(self, hash_object) -> None:
         ## the environment reflects both the modulepath and the modulename(s)
-        hash_object.update(",".join([self.spec.names, self.spec.modulepath]).encode())
+        hash_object.update(
+            ",".join([self.spec.repositories, self.spec.modulepath]).encode()
+        )
 
     def report_software(self) -> Iterable[SoftwareReport]:
         # cp = self.run_cmd(
