@@ -79,7 +79,7 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
-      - name: Check alice
+      - name: Try alice at CERN
         run: |
           source /etc/profile.d/modules.sh
           sudo cvmfs_config setup
@@ -98,7 +98,7 @@ jobs:
           module avail
           module load dot
           
-      - name: Run pytest with EESSI
+      - name: Run pytest with EESSI and computecanada
         run: |
           source /etc/profile.d/modules.sh
           poetry run coverage run -m pytest
