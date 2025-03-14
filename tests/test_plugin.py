@@ -16,9 +16,9 @@ from snakemake_interface_software_deployment_plugins.settings import (
 )
 
 from src.snakemake_software_deployment_plugin_cvmfs import (
-    Env,
-    EnvSpec,
-    SoftwareDeploymentSettings,
+    CvmfsEnv,
+    CvmfsEnvSpec,
+    CvmfsSettings,
 )
 
 
@@ -31,26 +31,26 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
     # optional, default is "bash" change if your test suite requires a different
     # shell or you want to have multiple instance of this class testing various shells
     shell_executable = "bash"
-
+    repositories = "software.eessi.io,alice.cern.ch"
+    
     def get_env_spec(self) -> EnvSpecBase:
         # If the software deployment provider does not support deployable environments,
         # this method should return an existing environment spec that can be used
         # for testing
-        return EnvSpec(
-            envfile=EnvSpecSourceFile(Path(__file__).parent / "a_module.lua")
-        )
-    
+        # return EnvSpec(
+        #     envfile=EnvSpecSourceFile(Path(__file__).parent / "a_module.lua")
+        # )
+        return CvmfsEnvSpec(self.repositories)
+        
     def get_env_cls(self) -> Type[EnvBase]:
         # Return the environment class that should be tested.
-        return Env
+        return CvmfsEnv
 
     def get_software_deployment_provider_settings(
         self,
     ) -> Optional[SoftwareDeploymentSettingsBase]:
-        return SoftwareDeploymentSettings(
-            repositories="software.eessi.io,alice.cern.ch",
-            client_profile="single",
-            http_proxy="auto",
+        return CvmfsSettings(
+            repositories=self.repositories
         )
 
     def get_test_cmd(self) -> str:
@@ -58,12 +58,12 @@ class TestSoftwareDeployment(TestSoftwareDeploymentBase):
         # with exit code 0 (i.e. without error).
         return "cvmfs_config showconfig software.eessi.io"
 
-## custom test cases
+# ## custom test cases
 
-class TestModuleLoad(TestSoftwareDeploymentBase):
-    __test__ = True  # activate automatic testing
+# class TestModuleLoad(TestSoftwareDeploymentBase):
+#     __test__ = True  # activate automatic testing
 
-    modulepath = os.environ['MODULEPATH']
+#     modulepath = os.environ['MODULEPATH']
     
-    def test_module_load(self, module = 'a_module'):
-        cp = self.load_module(module = module)
+#     def test_module_load(self, module = 'a_module'):
+#         cp = self.load_module(module = module)

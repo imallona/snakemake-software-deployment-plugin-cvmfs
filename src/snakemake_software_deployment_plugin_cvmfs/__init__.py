@@ -30,7 +30,7 @@ from subprocess import CompletedProcess
 # This way, a storage plugin can be used multiple times within a workflow with different
 # settings.
 @dataclass
-class SoftwareDeploymentSettings(SoftwareDeploymentSettingsBase):
+class CvmfsSettings(SoftwareDeploymentSettingsBase):
     repositories: Optional[str] = field(
         default="atlas.cern.ch",
         metadata={
@@ -46,7 +46,7 @@ class SoftwareDeploymentSettings(SoftwareDeploymentSettingsBase):
     )
 
     http_proxy: Optional[str] = field(
-        default="direct",
+        default="auto",
         metadata={"help": "CVMFS_HTTP_PROXY", "env_var": True, "required": True},
     )
 
@@ -61,7 +61,7 @@ class SoftwareDeploymentSettings(SoftwareDeploymentSettingsBase):
                   "env_var": True, "required": True},
     )
 
-class EnvSpec(EnvSpecBase):
+class CvmfsEnvSpec(EnvSpecBase):
     # This class should implement something that describes an existing or to be created
     # environment.
     # It will be automatically added to the environment object when the environment is
@@ -78,17 +78,16 @@ class EnvSpec(EnvSpecBase):
     # the attribute EnvSpecSourceFile.path_or_uri (of type str) can be used to show
     # the original value passed to the EnvSpec.
 
-    envfile: Optional[EnvSpecSourceFile] = None
+    # envfile: Optional[EnvSpecSourceFile] = None
     
-    def __init__(self, *names: str):
+    def __init__(self, *repositories: str):
         super().__init__()
-        self.names: Tuple[str] = names
+        self.repositories: str = repositories
 
-    ## these are module names
+    
     @classmethod
     def identity_attributes(self) -> Iterable[str]:
-        yield "envfile"
-        yield "names"
+        yield "repositories"
 
     @classmethod
     def source_path_attributes(cls) -> Iterable[str]:
@@ -104,7 +103,7 @@ class EnvSpec(EnvSpecBase):
 # If your environment cannot be archived or deployed, remove the respective methods
 # and the respective base classes.
 # All errors should be wrapped with snakemake-interface-common.errors.WorkflowError
-class Env(EnvBase):
+class CvmfsEnv(EnvBase):
     # For compatibility with future changes, you should not overwrite the __init__
     # method. Instead, use __post_init__ to set additional attributes and initialize
     # futher stuff.
@@ -113,8 +112,8 @@ class Env(EnvBase):
         self.config_probe()
         self.check()
 
-    def append_modulepath(self) -> str:
-        return(':'.join([self.settings.modulepath, os.environ['MODULEPATH']]))
+    # def append_modulepath(self) -> str:
+    #     return(':'.join([self.settings.modulepath, os.environ['MODULEPATH']]))
     
     def inject_cvmfs_envvars(self) -> dict:
         env = {}
@@ -122,8 +121,8 @@ class Env(EnvBase):
         env["CVMFS_REPOSITORIES"] = self.settings.repositories
         env["CVMFS_CLIENT_PROFILE"] = self.settings.client_profile
         env["CVMFS_HTTP_PROXY"] = self.settings.http_proxy
-        if self.settings.modulepath is not os.environ['MODULEPATH']:
-            env["MODULEPATH"] = self.append_modulepath()
+        # if self.settings.modulepath is not os.environ['MODULEPATH']:
+        #     env["MODULEPATH"] = self.append_modulepath()
         return env
 
     def config_probe(self) -> CompletedProcess:
