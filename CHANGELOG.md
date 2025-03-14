@@ -18,4 +18,4 @@
 
 ### Miscellaneous Chores
 
-* release 0.1.0 ([00ff831](https://github.com/imallona/snakemake-software-deployment-plugin-cvmfs/commit/00ff831ac51f40300b101968e9b952cc876ab9d9))
+* Original release 0.1.0 ([00ff831](https://github.com/imallona/snakemake-software-deployment-plugin-cvmfs/commit/00ff831ac51f40300b101968e9b952cc876ab9d9))

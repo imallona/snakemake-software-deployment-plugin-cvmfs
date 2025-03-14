@@ -48,6 +48,8 @@ jobs:
 
       - name: Publish to PyPi
         env:
-          PYPI_USERNAME: __token__
-          PYPI_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        run: poetry publish --build --username $PYPI_USERNAME --password $PYPI_PASSWORD
+          PYPI_USERNAME: imallona
+          PYPI_PASSWORD: ${{ secrets.PYPI_PASS }}
+        run: |
+          poetry config http-basic.pypi $PYPI_USERNAME $PYPI_PASSWORD
+          poetry publish --build 
