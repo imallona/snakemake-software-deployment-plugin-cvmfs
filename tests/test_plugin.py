@@ -78,11 +78,9 @@ class TestEessiModule(TestSoftwareDeploymentBase):
 
 class TestLocalModule(TestSoftwareDeploymentBase):
     __test__ = True  # activate automatic testing
-    # optional, default is "bash" change if your test suite requires a different
-    # shell or you want to have multiple instance of this class testing various shells
     shell_executable = "bash"
     repositories = "software.eessi"
-    modulepath = Path(__file__).parent
+    modulepath = Path(__file__).parent ## should be here, no idea where
 
     def get_env_spec(self) -> EnvSpecBase:
         return CvmfsEnvSpec(self.repositories)
@@ -99,4 +97,4 @@ class TestLocalModule(TestSoftwareDeploymentBase):
         # Return a test command that should be executed within the environment
         # with exit code 0 (i.e. without error).
         # return "echo $MODULEPATH; pwd ; ls"
-        return "module avail && module show a_module"
+        return "module load a_module"
