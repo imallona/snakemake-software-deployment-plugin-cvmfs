@@ -1,6 +1,6 @@
 [project]
 name = "snakemake-software-deployment-plugin-cvmfs"
-version = "0.2.0"
+version = "0.2.1"
 description = "A snakemake plugin to use CernVM-FS (cvmfs) as software deployment (backend)"
 readme = "README.md"
 requires-python = ">=3.11,<4.0"
